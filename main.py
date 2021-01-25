@@ -14,17 +14,19 @@ if __name__ == '__main__':
     params_dict2 = {'i': 0.0085, 'r': 0.006, 'd': 0.0033}
     state0={'S':100,'I':1,'R':0,'D':0}
 
-    cont1=Deterministic.Continuos(text_con,params_dict1)
+    cont1=Deterministic.Continuos(text_con,params_dict1,dt=0.1)
     cont2 = Deterministic.Continuos(text_con, params_dict2)
     data1=cont1.evolve(state0,0,20)
-    data2=cont2.evolve(state0,0,20)
-    mse=(data1-data2).values
-    mse=mse**2
-    mse=np.mean(np.sum(mse,0))
-    print(mse)
-    cont2.fit(data1)
 
 
+    loss=cont2.fit(data1,lr=1e-1,n_steps=300)
+    print(cont2.parameters_dict)
+    data2 = cont2.evolve(state0, 0, 20)
+    plt.plot(loss)
+    plt.show()
+
+    fig=visualizer.stochastic_plot([data1,data2])
+    plt.show()
 
 
 
