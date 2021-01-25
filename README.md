@@ -36,3 +36,4 @@ Explore the visualizer module for astonishing graphs<br />
      stohastic_system=ystem.to_stohastic()
  ```
 
+###! As for now evolve and fit should at the same time points
