@@ -19,14 +19,17 @@ if __name__ == '__main__':
     data1=cont1.evolve(state0,0,20)
 
 
-    loss=cont2.fit(data1,lr=1e-3,n_steps=300)
-    print(cont2.parameters_dict)
-    data2 = cont2.evolve(state0, 0, 20)
-    plt.plot(loss)
-    plt.show()
 
-    fig=visualizer.stochastic_plot([data1,data2])
-    plt.show()
+
+    loss = cont2.fit(data1, lr=1e-3, n_steps=100,device_type='cpu')
+
+
+
+
+
+
+
+
 
 
 

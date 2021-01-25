@@ -7,6 +7,7 @@ from collections import OrderedDict
 
 
 
+
 class Continuos(AbstractSystem):
     def __init__(self,system_text,parameters_dict,dt=1):
         super().__init__(system_text,parameters_dict,dt)
@@ -40,9 +41,9 @@ class Continuos(AbstractSystem):
     """
     Used during fitting in order to tape parameters gradient
     """
-    def parameters_to_tensors(self,requires_grad=True):
+    def parameters_to_tensors(self,device=None):
         for key,value in self.parameters_dict.items():
-            self.parameters_dict[key]=torch.tensor([value],requires_grad=requires_grad)
+            self.parameters_dict[key]=torch.tensor([value],device=device)
 
     def parameters_activate_grad(self):
         for key,value in self.parameters_dict.items():
@@ -50,7 +51,7 @@ class Continuos(AbstractSystem):
 
     def parameters_from_tensors(self):
         for key,value in self.parameters_dict.items():
-            self.parameters_dict[key]=value.detach().numpy()[0]
+            self.parameters_dict[key]=value.detach().cpu().numpy()[0]
 
 
 
@@ -74,7 +75,13 @@ class Continuos(AbstractSystem):
     first dimension:time
     second dimension: features
     """
-    def fit(self,data,lr=1e-3,n_steps=100,t=None):
+    def fit(self,data,lr=1e-3,n_steps=100,t=None,device_type=None):
+
+        device=set_device(device_type)
+
+
+        
+
         "prepare data"
         t_steps=data.shape[0]
         n_features=data.shape[1]
@@ -85,15 +92,15 @@ class Continuos(AbstractSystem):
             t=t+np.array(range(t_steps))*self.dt
 
         "make them tensors"
-        self.parameters_to_tensors()
-        tensor_data=torch.tensor([data.values],requires_grad=False)
+        self.parameters_to_tensors(device)
+        tensor_data=torch.tensor([data.values],requires_grad=False,device=device)
 
         "initial conditions"
         state_keys = data.keys()
         state0=OrderedDict({})
         for i,key in enumerate(state_keys):
             state0[key]=tensor_data[:,0,i]
-        state0_tensor=ordered_dict_to_tensor(state0)
+        state0_tensor=ordered_dict_to_tensor(state0,device)
 
         "define optimizer"
         optimizer = optim.Adam(self.parameters_dict.values(),lr=lr)
@@ -101,7 +108,7 @@ class Continuos(AbstractSystem):
 
         for step in range(n_steps):
             self.parameters_activate_grad()
-            results = torch.empty(tensor_data.size(), dtype=tensor_data.dtype)
+            results = torch.empty(tensor_data.size(), dtype=tensor_data.dtype,device=device)
             results[:, 0, :] = state0_tensor
             current_time = t[0]
             current_state = state0
@@ -118,7 +125,7 @@ class Continuos(AbstractSystem):
             optimizer.step()
             optimizer.zero_grad()
             loss_history.append(loss.detach())
-            print(loss_history[-1])
+
 
         self.parameters_from_tensors()
         return loss_history
@@ -153,8 +160,21 @@ class Discrete(Continuos):
 
 
 
-def ordered_dict_to_tensor(tensor_dict):
-    new_tensor=torch.empty(1,len(tensor_dict.keys()))
+def ordered_dict_to_tensor(tensor_dict,device=None):
+    new_tensor=torch.empty([1,len(tensor_dict.keys())],device=device)
     for i,tensor in enumerate(tensor_dict.values()):
         new_tensor[0,i]=tensor
     return new_tensor
+
+def set_device(device_name):
+    if torch.cuda.is_available() and device_name == "gpu":
+        device = torch.device('cuda')
+    elif device_name == "cpu" or device_name==None:
+        device = None
+    elif torch.cuda.is_available==False and device_name == "gpu":
+        print("No cuda detected. Using cpu instead!")
+        device=None
+    else:
+        raise("The device is a cpu or gpu")
+
+    return device
