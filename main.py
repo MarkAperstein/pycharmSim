@@ -11,15 +11,15 @@ if __name__ == '__main__':
     I->R,D:r*I,d*I
     """
     params_dict1={'i':0.01,'r':0.005,'d':0.002}
-    params_dict2 = {'i': 0.0085, 'r': 0.006, 'd': 0.0033}
+    params_dict2 = {'i': 0.005, 'r': 0.008, 'd': 0.0033}
     state0={'S':100,'I':1,'R':0,'D':0}
 
     cont1=Deterministic.Continuos(text_con,params_dict1,dt=0.1)
-    cont2 = Deterministic.Continuos(text_con, params_dict2)
+    cont2 = Deterministic.Continuos(text_con, params_dict2,dt=0.1)
     data1=cont1.evolve(state0,0,20)
 
 
-    loss=cont2.fit(data1,lr=1e-1,n_steps=300)
+    loss=cont2.fit(data1,lr=1e-3,n_steps=300)
     print(cont2.parameters_dict)
     data2 = cont2.evolve(state0, 0, 20)
     plt.plot(loss)

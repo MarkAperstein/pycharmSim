@@ -96,8 +96,9 @@ class Continuos(AbstractSystem):
         state0_tensor=ordered_dict_to_tensor(state0)
 
         "define optimizer"
-        optimizer = optim.Adam(self.parameters_dict.values())
+        optimizer = optim.Adam(self.parameters_dict.values(),lr=lr)
         loss_history=[]
+
         for step in range(n_steps):
             self.parameters_activate_grad()
             results = torch.empty(tensor_data.size(), dtype=tensor_data.dtype)
@@ -117,6 +118,7 @@ class Continuos(AbstractSystem):
             optimizer.step()
             optimizer.zero_grad()
             loss_history.append(loss.detach())
+            print(loss_history[-1])
 
         self.parameters_from_tensors()
         return loss_history

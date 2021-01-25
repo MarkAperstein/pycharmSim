@@ -13,3 +13,7 @@ def stochastic_plot(list_of_dfs,title=None,t_labels=None):
         ax.plot(list_of_dfs[i].values)
     ax.legend()
     return fig
+
+def scatter_vs_plot(scatter_df,plot_df,title=None,t_labels=None):
+    fig,ax=plt.subplots()
+    return fig
