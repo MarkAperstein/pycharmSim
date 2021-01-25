@@ -29,4 +29,11 @@ For conotinuous the next term is the derivative dX/dt,Discrete is the dX_n and f
  ```   
     
 the outtput process is a pandas DataFrame<br />
-Explore the visualize module for astonishing graphs<br />
+Explore the visualizer module for astonishing graphs<br />
+ You can easily convert from deterministic to stohastic model by calling<br />
+ 
+ ``` python
+     stohastic_system=ystem.to_stohastic()
+ ```
+
+###! As for now evolve and fit should at the same time points
