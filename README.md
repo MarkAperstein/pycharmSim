@@ -25,7 +25,7 @@ For conotinuous the next term is the derivative dX/dt,Discrete is the dX_n and f
     
     
     system=Deterministic.Continuos(text_con,params_dict1,dt=0.1)
-    process=cont1.evolve(state0,t0,t1)
+    process=system.evolve(state0,t0,t1)
  ```   
     
 the outtput process is a pandas DataFrame<br />
@@ -36,4 +36,7 @@ Explore the visualizer module for astonishing graphs<br />
      stohastic_system=ystem.to_stohastic()
  ```
 
-###! As for now evolve and fit should at the same time points
+###! As for now evolve and fit should at the same time points<br />
+NEED TO ADD<br />
+    1. Multiprocessing:fitting with different initial conditions/lr,parallel simulations<br />
+    2. Update visualizer<br />
