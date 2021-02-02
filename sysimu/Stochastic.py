@@ -1,26 +1,20 @@
 from .AbstractSystem import AbstractSystem
+from . import Deterministic
 import numpy as np
 import copy
 
 
-
-
-
-
-
-
-
 class Stochastic(AbstractSystem):
-    def __init__(self, system_text, parameters_dict,dt=1):
-        super().__init__(system_text,parameters_dict, dt)
+    def __init__(self, system_text, parameters_dict,special_functions={},dt=1):
+        super().__init__(system_text,parameters_dict,special_functions=special_functions,dt=dt)
 
     def evolve_step(self, state_dict, t0):
         next_state = copy.deepcopy(state_dict)
-
         global_dict = {}
         global_dict.update(state_dict)
         global_dict.update(self.parameters_dict)
         global_dict.update({'t': t0})
+        global_dict.update(self.special_functions)
 
         for source_key in next_state.keys():
 
@@ -53,6 +47,16 @@ class Stochastic(AbstractSystem):
 
 
         return next_state
+
+
+
+    def toDeterministicDiscrete(self):
+        discrete_system = Deterministic.Discrete(self.system_description,self.parameters_dict,dt=self.dt,special_functions=self.special_functions)
+        return discrete_system
+
+    def toDeterministicContinuos(self):
+        continuos_system = Deterministic.Continuos(self.system_description,self.parameters_dict,dt=self.dt,special_functions=self.special_functions)
+        return continuos_system
 
 
 

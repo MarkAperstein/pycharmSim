@@ -1,4 +1,5 @@
 from .AbstractSystem import AbstractSystem
+from . import Stochastic
 import torch
 import numpy as np
 from torch import nn,optim
@@ -9,8 +10,8 @@ from collections import OrderedDict
 
 
 class Continuos(AbstractSystem):
-    def __init__(self,system_text,parameters_dict,dt=1):
-        super().__init__(system_text,parameters_dict,dt)
+    def __init__(self,system_text,parameters_dict,special_functions={},dt=1):
+        super().__init__(system_text,parameters_dict,special_functions=special_functions,dt=dt)
 
     @torch.enable_grad()
     def evolve_step(self,state_dict,t0):
@@ -20,6 +21,7 @@ class Continuos(AbstractSystem):
         global_dict.update(state_dict)
         global_dict.update(self.parameters_dict)
         global_dict.update({'t':t0})
+        global_dict.update(self.special_functions)
 
         for source_key in next_state.keys():
             for destination,function in self.interaction_dict[source_key]:
@@ -130,6 +132,9 @@ class Continuos(AbstractSystem):
         self.parameters_from_tensors()
         return loss_history
 
+    def toStochastic(self):
+        stochastic_system=Stochastic.Stochastic(self.system_description,self.parameters_dict,special_functions=self.special_functions,dt=1)
+        return stochastic_system
 
 
 
@@ -137,28 +142,10 @@ class Continuos(AbstractSystem):
 
 
 class Discrete(Continuos):
-    def __init__(self,system_text,parameters_dict):
-        super().__init__(system_text,parameters_dict)
-
-    def evolve_step(self,state_dict,t0):
-        next_state=state_dict.copy()
-
-        global_dict={}
-        global_dict.update(state_dict)
-        global_dict.update(self.parameters_dict)
-        global_dict.update({'t':t0})
-
-        for source_key in next_state.keys():
-            for destination,function in self.interaction_dict[source_key]:
-                df=eval(function,global_dict)
-
-                next_state[source_key]-=df
-                next_state[destination]+=df
-
-        return next_state
 
 
-
+    def __init__(self,system_text,parameters_dict,special_functions={}):
+        super().__init__(system_text,parameters_dict,dt=1,special_functions=special_functions)
 
 def ordered_dict_to_tensor(tensor_dict,device=None):
     new_tensor=torch.empty([1,len(tensor_dict.keys())],device=device)

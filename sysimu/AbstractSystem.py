@@ -6,14 +6,22 @@ import abc
 
 class AbstractSystem(metaclass=abc.ABCMeta):
 
-    def __init__(self,interaction_text,parameters_dict,dt=1):
+    def __init__(self,interaction_text,parameters_dict,special_functions={},dt=1):
         """most general system is described as follows
         interactions dict governs the evolution of the system.
         interactions_dict={'from_state_key':{to_key:(f_interaction)}
         """
+        if parameters_dict==None:
+            parameters_dict={}
+
         self.parameters_dict=parameters_dict
         self.read_interaction_dict(interaction_text)
         self.dt=dt
+        self.special_functions=special_functions
+
+
+        self.system_description = interaction_text
+
 
     @abc.abstractmethod
     def evolve_step(self,state_dict0,t0):
